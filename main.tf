@@ -5,6 +5,7 @@ provider "aws" {
 # Obtener las zonas de disponibilidad
 data "aws_availability_zones" "available" {}
 
+
 # Crear el VPC
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr_block
@@ -111,7 +112,7 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
+    type = "fixed-response"c
     fixed_response {
       content_type = "text/plain"
       message_body = "Success"
@@ -122,7 +123,7 @@ resource "aws_lb_listener" "http" {
 
 # Crear el grupo de destino para el ALB
 resource "aws_lb_target_group" "web_tg" {
-  name     = "web-tg"
+  name     = "web-tg-1"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
