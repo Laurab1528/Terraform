@@ -112,7 +112,7 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"c
+    type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
       message_body = "Success"
