@@ -105,12 +105,7 @@ resource "aws_lb" "web_lb" {
   enable_http2                       = true
 }
 
-resource "aws_lb_target_group" "web_tg" {
-  name     = "unique-web-tg-name"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
-}
+
 
 
 # Crear el listener para el ALB
