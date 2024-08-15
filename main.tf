@@ -60,20 +60,15 @@ resource "aws_security_group" "elb_sg" {
 
 # Crear el grupo de seguridad para las instancias EC2
 resource "aws_security_group" "ec2_sg" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  name        = "my-security-group"
+  description = "Security group for EC2 instances"
+  vpc_id      = "vpc-12345678"  # Asegúrate de que este ID sea correcto
 
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    security_groups = [aws_security_group.elb_sg.name]  # Correcto si el nombre es utilizado
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -99,16 +94,24 @@ resource "aws_instance" "web" {
 
 # Crear el Application Load Balancer
 resource "aws_lb" "web_lb" {
-  name               = "web-lb"
+  name               = "unique-web-lb-name"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.elb_sg.id]
-  subnets            = aws_subnet.main[*].id  # Listar todas las subredes
-
+  security_groups    = [aws_security_group.ec2_sg.id]
+  subnets            = aws_subnet.public.*.id
   enable_deletion_protection = false
-  idle_timeout             = 60
-  drop_invalid_header_fields = true
+
+  enable_cross_zone_load_balancing = true
+  enable_http2                       = true
 }
+
+resource "aws_lb_target_group" "web_tg" {
+  name     = "unique-web-tg-name"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+}
+
 
 # Crear el listener para el ALB
 resource "aws_lb_listener" "http" {
