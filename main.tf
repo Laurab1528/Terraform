@@ -89,7 +89,17 @@ resource "aws_instance" "web" {
   ami           = var.instance_ami_id
   instance_type = var.instance_type
   subnet_id     = aws_subnet.public[count.index].id
-  security_groups = [aws_security_group.ec2_sg.name]
+  security_groups = [aws_security_group.ec2_sg.id]
+  associate_public_ip_address = true
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo apt update -y
+    sudo apt install apache2 -y
+    sudo systemctl start apache2
+    sudo systemctl enable apache2
+    echo "<h1>Deployed via Terraform by Laura </h1>" | sudo tee /var/www/html/index.html
+  EOF
+
 }
 
 # Crear el Application Load Balancer
@@ -112,14 +122,11 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Success"
-      status_code  = "200"
-    }
+    type = "forward"
+    target_group_arn= aws_lb_target_group.web_tg.arn
   }
 }
+
 
 # Crear el grupo de destino para el ALB
 resource "aws_lb_target_group" "web_tg" {
